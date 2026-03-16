@@ -1,38 +1,76 @@
 # Databricks User Group Jaipur – 4th Edition Meetup
 
-This repository contains the code, notebooks, and sample data used in the **4th edition meetup of the Databricks User Group Jaipur**.
+This repository contains the code, notebooks, and sample data used in the **4th edition meetup of the Databricks User Group Jaipur**, held on **31 March 2026**.
 
-End-to-end **Databricks Free Edition** project used in the *Databricks User Group Jaipur* meetup on **31 March 2026**.
-
-We show how to go from **zero setup** to **Delta tables and dashboards** using anonymized **electricity bill PDFs**:
-
-- Upload PDFs to a Unity Catalog **Volume**
-- Turn real-world **electricity bill PDFs** into clean **Delta tables**  
-- Use **AI document parsing** to extract structured fields
-- Store clean data in **Delta tables**
-- Build **dashboards** and ask **AI-assisted questions** on top
-
-The goal of this repo is to make the entire meetup **reproducible** for:
-- Attendees who want to replay the steps at home  
-- New community members who discover the Databricks User Group Jaipur later  
-- Anyone looking for a simple but realistic end-to-end Data & AI example on Databricks
+In this meetup we use **Databricks Free Edition** to go from **zero setup** to **Delta tables and decision‑making dashboards** using anonymized **electricity bill PDFs**.
 
 ---
 
-## 1. Who is this for?
+## 1. What this repo demonstrates
 
-- Students who want a *real, relatable* project (everyone has an electricity bill).
-- Data & analytics professionals exploring **Databricks Free Edition**.
-- Community members who want a reproducible project they can extend.
+Based on the live sessions:
+
+- **Session 1 – Databricks Free Edition Kickstart: From Zero Setup to Delta Lake**  
+  - What Databricks Free Edition is and what you can do with it  
+  - How to sign up and get your first workspace  
+  - How to upload PDFs into a Unity Catalog **Volume**  
+  - How to use **AI document parsing** to extract structured fields from electricity bills  
+  - How to save clean data into **Delta tables**
+
+- **Session 2 – From Delta Tables to Decision‑Making: Building Dashboards in Databricks**  
+  - How to run analytics on the Delta table (usage, cost, subsidies, late fees)  
+  - How to build simple but powerful **dashboards** on top of the bills data  
+  - How to use **Databricks Assistant / AI features** to generate queries and explore insights
+
+The goal of this repo is to make the entire meetup **fully reproducible** for:
+
+- Attendees who want to replay the steps at home  
+- New community members who discover **Databricks User Group Jaipur** later  
+- Anyone looking for a realistic end‑to‑end **Data & AI** example on Databricks Free Edition
+
+---
+
+## 2. Who is this for?
+
+- **Students** who want a *real, relatable* project (everyone has an electricity bill).  
+- **Data & analytics professionals** exploring **Databricks Free Edition** and the lakehouse.  
+- **Community members** who want a small but complete project they can extend.
 
 You only need:
 
-- A Databricks **Free Edition** account (no credit card)  
-- A browser and ~60–90 minutes
+- A Databricks **Free Edition** account (no credit card required)  
+- A modern browser and about **60–90 minutes**
 
 ---
 
-## 2. Project structure
+## 3. What is Databricks Free Edition? (from the meetup)
+
+In line with the slides:
+
+- Full Databricks workspace with **no credit card required**  
+- **Serverless compute** automatically provisioned for you  
+- **Built‑in storage** for data and files  
+- Access to **Unity Catalog** for basic data governance  
+
+You can:
+
+- Learn Databricks concepts and SQL/Python/Spark  
+- Build simple data engineering pipelines with **Delta tables**  
+- Create **dashboards and visualizations**  
+- Experiment with **AI document parsing** and basic **AI agents**
+
+Limitations to keep in mind (summarized):
+
+- Small cluster size, **serverless only**, no custom cluster configs  
+- Up to a few concurrent jobs (no heavy parallel workloads)  
+- Restricted outbound internet, no direct external cloud storage (S3/ADLS)  
+- No production‑grade ML features like model serving
+
+This project is designed to **respect those limits** and still show an impactful end‑to‑end flow.
+
+---
+
+## 4. Project structure
 
 ```text
 notebooks/
