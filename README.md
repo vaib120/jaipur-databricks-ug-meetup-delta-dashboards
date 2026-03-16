@@ -87,3 +87,22 @@ sample-data/
 images/
   architecture-overview.png
   sample-dashboard.png
+
+```
+
+---
+
+## 5. Step‑by‑step: from sign‑up to Delta tables and dashboards
+  5.1 Sign up for Databricks Free Edition
+    Go to the Free Edition page:
+    
+    https://www.databricks.com/learn/free-edition
+    
+  - Click Start for free and create your account (email + password).
+    
+  - After login, you land in your Free Edition workspace with:    
+    - A default catalog (e.g. main)    
+    - Acess to Unity Catalog and Volumes
+    - Serverless compute available for notebooks
+
+          If you already have Free Edition, just log in and go to the workspace home.  
