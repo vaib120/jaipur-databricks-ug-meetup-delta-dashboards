@@ -86,6 +86,11 @@ where tr like '%<td>%'
 
 -- COMMAND ----------
 
+
+-- Using ai_query on extracted PDF text with mixed Hindi and English can produce inaccurate or hallucinated results.
+-- Instead, convert PDF pages to images and store them.
+-- ai_query supports direct folder paths with images (not PDFs), making extraction more reliable and accurate.
+
 CREATE OR REPLACE TABLE main.electricity_bills AS
 SELECT
   path,
@@ -138,6 +143,38 @@ SELECT
     }'
   ) AS bill
 FROM main.bills_text;
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ## The core logic of the image process:
+-- MAGIC
+-- MAGIC ### Direct PDF ingestion 
+-- MAGIC   - Reads raw image bill files from a Unity Catalog volume using READ_FILES with binary format, bypassing the need for intermediate text parsing
+-- MAGIC
+-- MAGIC ### AI-powered extraction 
+-- MAGIC   - Uses ai_query with the Databricks Llama 4 Maverick model to intelligently extract structured data from unstructured bill documents
+-- MAGIC
+-- MAGIC ### Bilingual processing 
+-- MAGIC   - Handles mixed Hindi-English content by instructing the AI to recognize Hindi field labels (like उपभोग, नियत तिथि) and map them to standardized English field names
+-- MAGIC
+-- MAGIC ### Domain context 
+-- MAGIC   - Provides the AI with specific domain knowledge about JVVNL (Rajasthan electricity utility) bill format and terminology to improve extraction accuracy
+-- MAGIC
+-- MAGIC ### Explicit field mapping 
+-- MAGIC   - Supplies examples of Hindi-to-English translations directly in the prompt to guide the model (e.g., उपभोग → consumption_units)
+-- MAGIC
+-- MAGIC ### Strict schema enforcement 
+-- MAGIC   - Defines a JSON schema with 26+ specific fields covering account info, readings, consumption, charges, subsidies, and dates to ensure consistent output structure
+-- MAGIC
+-- MAGIC ### Null handling 
+-- MAGIC   - Allows null values for every field to gracefully handle missing or unreadable data without breaking the extraction pipeline
+-- MAGIC
+-- MAGIC ### Metadata tracking 
+-- MAGIC   - Captures file path and processing timestamp alongside extracted bill data for auditability and troubleshooting
+-- MAGIC
+-- MAGIC ### Single-pass processing 
+-- MAGIC   - Creates the final table directly from raw files in one operation, eliminating intermediate staging tables
 
 -- COMMAND ----------
 
@@ -197,6 +234,38 @@ FROM READ_FILES(
   '/Volumes/main/electricity/raw_bills/',
   format => 'binaryFile'
 );
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ## Next Step Data transformation:
+-- MAGIC
+-- MAGIC ### JSON flattening 
+-- MAGIC   - Extracts nested fields from the JSON bill column produced by AI extraction into individual relational columns using get_json_object with JSONPath syntax
+-- MAGIC
+-- MAGIC ### Date standardization 
+-- MAGIC   - Converts string date values (bill_issue_date, due_date, last_payment_date) to proper DATE types using try_to_date with the dd-MM-yyyy format pattern
+-- MAGIC
+-- MAGIC ### Type enforcement 
+-- MAGIC   - Transforms all numeric fields (consumption, charges, subsidies, amounts) from JSON strings to DOUBLE data type using try_cast for precise calculations
+-- MAGIC
+-- MAGIC ### String field preservation 
+-- MAGIC   - Keeps categorical fields like account_number, meter_number, and sanctioned_category as strings without transformation
+-- MAGIC
+-- MAGIC ### Graceful error handling 
+-- MAGIC   - Uses try_cast function throughout to return NULL for malformed data instead of failing the entire query, ensuring robustness
+-- MAGIC
+-- MAGIC ### Metadata retention 
+-- MAGIC   - Preserves path (source file) and processed_at (timestamp) columns for data lineage and audit trail
+-- MAGIC
+-- MAGIC ### View creation 
+-- MAGIC   - Produces a clean, analytics-ready view layer (bills_view) that abstracts away the raw JSON structure from downstream queries
+-- MAGIC
+-- MAGIC ### Schema normalization 
+-- MAGIC   - Converts semi-structured AI output into a structured relational format with 27 typed columns ready for analysis and reporting
+-- MAGIC
+-- MAGIC ### Consistent naming 
+-- MAGIC   - Maintains the standardized English field names established during AI extraction for clarity across the pipeline
 
 -- COMMAND ----------
 
@@ -316,3 +385,16 @@ FROM (
   FROM main.bills_view
 )
 LATERAL VIEW explode(m) t AS category, amount;
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC |                    | ai_parse_document                    | ai_extract              | ai_query                                                                    |
+-- MAGIC | ------------------ | ------------------------------------ | ----------------------- | --------------------------------------------------------------------------- |
+-- MAGIC | Input              | Binary file                          | String text             | String text                                                                 |
+-- MAGIC | Output             | VARIANT (rich JSON)                  | STRUCT (fixed fields)   | STRING or STRUCT                                                            |
+-- MAGIC | Use for            | PDF/image OCR                        | Known field extraction  | Complex prompts, custom logic                                               |
+-- MAGIC | Parameters         | version, imagePath, descriptionTypes | content, labels         | endpoint, request, returnType, failOnError, modelParameters, responseFormat |
+-- MAGIC | Hindi support      | Good                               |  Tuned for English    | Best (Claude/Llama)                                                       |
+-- MAGIC | Cost tracking      | AI_FUNCTIONS product                 | MODEL_SERVING product   | MODEL_SERVING product                                                       |
+-- MAGIC | Best for your demo | Step 1 (read PDFs)                   | Step 2 (extract fields) | Step 3 (complex analysis)                                                   |

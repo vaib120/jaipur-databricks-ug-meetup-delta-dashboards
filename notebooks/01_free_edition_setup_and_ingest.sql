@@ -13,7 +13,7 @@ CREATE VOLUME IF NOT EXISTS main.bills_volume;
 -- COMMAND ----------
 
 -- DBTITLE 1,Verify Volume Path
-SELECT 'Volume ready at: /Volumes/demo/main/bills_volume/' AS message;
+SELECT 'Volume ready at: /Volumes/demo/main/bills_volume/pdfs/' AS message;
 -- ACTION: Upload your 4 JVVNL PDF bills to this path now.
 
 -- COMMAND ----------
@@ -24,7 +24,7 @@ SELECT
   path,
   content
 FROM READ_FILES(
-  '/Volumes/demo/main/bills_volume/',
+  '/Volumes/demo/main/bills_volume/pdfs/',
   format => 'binaryFile',
   fileNamePattern => '*.pdf'
 );
